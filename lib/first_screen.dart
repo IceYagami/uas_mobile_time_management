@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:uts_mobile/home.dart';
-import 'package:uts_mobile/login.dart';
-import 'package:uts_mobile/sign_up.dart';
+import 'package:uts_mobile/auth/login.dart';
+import 'package:uts_mobile/auth/sign_up.dart';
 import 'package:uts_mobile/style.dart';
-import 'package:uts_mobile/widget/custom_textfield.dart';
 
 class firstScreen extends StatefulWidget {
   const firstScreen({super.key});
@@ -15,8 +12,9 @@ class firstScreen extends StatefulWidget {
 
 class _firstScreenState extends State<firstScreen> {
   final emailController = TextEditingController();
-  final passwordController = TextEditingController();
   bool isObscure = true;
+  final passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,25 +27,20 @@ class _firstScreenState extends State<firstScreen> {
               const SizedBox(
                 height: 40.0,
               ),
-
               Image.asset('aset_media/gambar/mobile_login.png'),
               const SizedBox(height: 40.0),
-              
               const SizedBox(
                 height: 20.0,
               ),
-
-
-
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkblue,
+                    backgroundColor: AppColors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     )),
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (_) => LoginScreen()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()));
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -61,16 +54,15 @@ class _firstScreenState extends State<firstScreen> {
               const SizedBox(
                 height: 24.0,
               ),
-
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkblue,
+                    backgroundColor: AppColors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     )),
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (_) => SignUpScreen()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const SignUpScreen()));
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -81,7 +73,6 @@ class _firstScreenState extends State<firstScreen> {
                   ),
                 ),
               ),
-              
             ],
           ),
         ),

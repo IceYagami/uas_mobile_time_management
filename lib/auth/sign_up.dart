@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:uts_mobile/login.dart';
+import 'package:get/get.dart';
+import 'package:uts_mobile/auth/login.dart';
+import 'package:uts_mobile/services/auth_service.dart';
 import 'package:uts_mobile/style.dart';
+import 'package:uts_mobile/utils/contants.dart';
 import 'package:uts_mobile/widget/custom_textfield.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -11,10 +14,27 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final authservice = AuthService();
   final confirmPasswordController = TextEditingController();
+  final emailController = TextEditingController();
   bool isObscure = true;
+  final passwordController = TextEditingController();
+  final usernameController = TextEditingController();
+
+  _signup() {
+    if (emailController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
+      return;
+    }
+    if (passwordController.text != confirmPasswordController.text) {
+      return;
+    }
+    authservice.createUserWithEmailAndPassword(
+        emailController.text, passwordController.text);
+    Get.offNamed("/login");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +51,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 style: TextStyles.title.copyWith(
                   fontSize: 30.0,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.darkgrey,
+                  color: createThemeColorSchema(
+                      lightColor: AppColors.grey, darkColor: Colors.white),
                 ),
               ),
               const SizedBox(
@@ -51,7 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 textInputType: TextInputType.visiblePassword,
                 textInputAction: TextInputAction.next,
                 hint: 'Password',
-                isObsure: isObscure,
+                isObscure: isObscure,
                 hasSuffix: true,
                 onPressed: () {
                   setState(() {
@@ -67,7 +88,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 textInputType: TextInputType.visiblePassword,
                 textInputAction: TextInputAction.done,
                 hint: 'Confirm Password',
-                isObsure: isObscure,
+                isObscure: isObscure,
                 hasSuffix: true,
                 onPressed: () {
                   setState(() {
@@ -80,13 +101,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkblue,
+                    backgroundColor: AppColors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     )),
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (_) => LoginScreen()));
+                  _signup();
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -102,8 +122,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (_) => LoginScreen()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()));
                 },
                 child: Row(
                   children: [
@@ -116,7 +136,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     Text(
                       'Sign in',
                       style: TextStyles.body
-                          .copyWith(fontSize: 16.0, color: AppColors.darkblue),
+                          .copyWith(fontSize: 16.0, color: AppColors.blue),
                     ),
                   ],
                 ),

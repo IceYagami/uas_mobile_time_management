@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "989012661206",
+    "project_id": "time-management-app-f4483",
+    "storage_bucket": "time-management-app-f4483.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989012661206:android:ad649a63bc856e43b08a77",
+        "android_client_info": {
+          "package_name": "com.example.uts_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-APuN_t0ZI12BaOi5lptyw49TJao5s-s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

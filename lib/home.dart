@@ -1,299 +1,281 @@
 import 'package:calendar_slider/calendar_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:uts_mobile/navbar.dart';
-import 'package:uts_mobile/style.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:uts_mobile/controller/schedule_controller.dart';
+import 'package:uts_mobile/drawer.dart';
+import 'package:uts_mobile/models/schedule_model.dart';
+import 'package:uts_mobile/schedule/add_schedule.dart';
+import 'package:uts_mobile/schedule/edit_schedule.dart';
+import 'package:uts_mobile/utils/contants.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key});
+  const HomeScreen({
+    super.key,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final schedule = Get.find<ScheduleController>();
+
+  final CalendarSliderController _firstController = CalendarSliderController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late DateTime _selectedDate;
+  String _selectedCategory = 'All';
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: CalendarSlider(
-        backgroundColor: AppColors.darkblue,
-        dateColor: Colors.white,
-        tileBackgroundColor: AppColors.darkblue,
-        selectedTileBackgroundColor: Colors.white,
-        monthYearTextColor: Colors.black,
-        monthYearButtonBackgroundColor: Colors.white,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.now().subtract(Duration(days: 140)),
-        lastDate: DateTime.now().add(Duration(days: 365)),
-        onDateSelected: (date) {
-          print(date);
-        },
-      ),
-      drawer: NavBarScreen(),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 10.0),
-        child: ListView(
-          children: [
-            Card(
-              elevation: 10,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
-                child: ListTile(
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.delete),
-                      SizedBox(width: 10),
-                      Icon(Icons.edit),
-                    ],
-                  ),
-                  title: Row(
-                    children: [
-                      Text("Study"),
-                      SizedBox(width: 8),
-                      Text("12:00",
-                          style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
-                  ),
-                  subtitle: Text("Kuliah Mata Pelajaran Pemrograman Mobile"),
-                  leading: Container(
-                    child: Icon(Icons.book,
-                        color: const Color.fromARGB(255, 54, 168, 244)),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            Card(
-              elevation: 10,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
-                child: ListTile(
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.delete),
-                      SizedBox(width: 10),
-                      Icon(Icons.edit),
-                    ],
-                  ),
-                  title: Row(
-                    children: [
-                      Text("Me Time"),
-                      SizedBox(width: 8),
-                      Text("14:00",
-                          style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
-                  ),
-                  subtitle: Text("Ke Kost King Januar Main EPEP"),
-                  leading: Container(
-                    child: Icon(Icons.people, color: Colors.green),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddScheduleDialog(context);
-        },
-        child: Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-                onPressed: () {
-                  _scaffoldKey.currentState!.openDrawer();
-                },
-                icon: Icon(Icons.menu)),
-            SizedBox(width: 20),
-            IconButton(onPressed: () {}, icon: Icon(Icons.home)),
-          ],
-        ),
-      ),
-    );
+  void initState() {
+    _selectedDate = DateTime.now();
+
+    super.initState();
+  }
+
+  int getDaysInMonth(int year, int month) {
+    if (month == 12) {
+      year++;
+      month = 1;
+    } else {
+      month++;
+    }
+
+    DateTime firstDayNextMonth = DateTime(year, month, 1);
+    DateTime lastDayCurrentMonth =
+        firstDayNextMonth.subtract(const Duration(days: 1));
+
+    return lastDayCurrentMonth.day;
   }
 
   void _showAddScheduleDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddScheduleDialog();
+        return const AddScheduleDialog();
       },
     );
   }
-}
 
-class AddScheduleDialog extends StatefulWidget {
-  const AddScheduleDialog({Key? key}) : super(key: key);
-
-  @override
-  State<AddScheduleDialog> createState() => _AddScheduleDialogState();
-}
-
-class _AddScheduleDialogState extends State<AddScheduleDialog> {
-  String _category = 'Me Time';
-  String _time = '5 MENIT';
-  late DateTime _selectedDate;
-  late TimeOfDay _selectedTime;
-  bool isExpense = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDate = DateTime.now();
-    _selectedTime = TimeOfDay.now();
+  void _changeSelectedDate(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+    });
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(Duration(days: 365)),
-      lastDate: DateTime.now().add(Duration(days: 365)),
+  void _changeCategory(String category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+  }
+
+  List<ScheduleItemModel> _processTasks(List<ScheduleItemModel> tasks) {
+    Map<String, List<ScheduleItemModel>> groupedTasks = {};
+
+    for (var task in tasks) {
+      final startTime = DateFormat("hh:mm").parse(task.waktu);
+      String hour = DateFormat.H().format(startTime);
+
+      groupedTasks.putIfAbsent(hour, () => []);
+      groupedTasks[hour]!.add(task);
+    }
+
+    groupedTasks.forEach((hour, tasks) {
+      tasks.sort((a, b) {
+        final startTimeA = DateFormat('hh:mm').parse(a.waktu);
+        final startTimeB = DateFormat('hh:mm').parse(b.waktu);
+        return startTimeB.compareTo(startTimeA);
+      });
+    });
+
+    List<ScheduleItemModel> sortedTasks = [];
+
+    for (var tasks in groupedTasks.values) {
+      sortedTasks.addAll(tasks);
+    }
+
+    return sortedTasks;
+  }
+
+  Iterable<ScheduleItemModel> _filterByDateAndCategory() {
+    return schedule.data.where((task) {
+      DateTime taskDateRaw = DateTime.parse(task.tanggal);
+
+      DateTime formattedTaskDate = DateTime(
+        taskDateRaw.year,
+        taskDateRaw.month,
+        taskDateRaw.day,
+      );
+
+      DateTime formattedSelectedDate = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+      );
+
+      bool matchesDate =
+          formattedTaskDate.isAtSameMomentAs(formattedSelectedDate);
+      bool matchesCategory = _selectedCategory == 'All' ||
+          kategoriItem[task.kategori] == _selectedCategory;
+
+      return matchesDate && matchesCategory;
+    });
+  }
+
+  Widget _buildCategoryButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: kategoriItem.map((category) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+          child: ElevatedButton(
+            onPressed: () => _changeCategory(category),
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  _selectedCategory == category ? Colors.blue : Colors.white,
+            ),
+            child: Text(
+              category,
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+        );
+      }).toList()
+        ..add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2.0),
+            child: ElevatedButton(
+              onPressed: () => _changeCategory('All'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    _selectedCategory == 'All' ? Colors.blue : Colors.white,
+              ),
+              child: const Text(
+                'All',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
     );
-    if (picked != null && picked != _selectedDate)
-      setState(() {
-        _selectedDate = picked;
-      });
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: _selectedTime);
-    if (picked != null && picked != _selectedTime)
-      setState(() {
-        _selectedTime = picked;
-      });
+  Widget _buildScheduleList() {
+    final schedules = _processTasks(_filterByDateAndCategory().toList());
+
+    if (schedules.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: Text(
+            "No Schedule",
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.grey,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Expanded(
+        child: ListView.builder(
+      itemCount: schedules.length,
+      itemBuilder: (context, index) {
+        final sc = schedules[index];
+        final timeStr = DateFormat("hh:mm").parse(sc.waktu);
+        final formattedTime = DateFormat("hh:mm a").format(timeStr);
+
+        return Card(
+          elevation: 10,
+          child: ListTile(
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    await schedule.deleteTask(sc);
+                    Get.snackbar("Deleted", "Success Delete ${sc.id}",
+                        backgroundColor: Colors.red);
+                  },
+                  icon: const Icon(Icons.delete),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return EditScheduleDialog(
+                          scheduleItem: sc,
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.edit),
+                ),
+              ],
+            ),
+            title: Row(
+              children: [
+                Text(kategoriItem[sc.kategori]),
+                const SizedBox(width: 8),
+                Text(
+                  formattedTime,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+            subtitle: Text(sc.catatan),
+            leading: Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.book, color: Color(0xFF36A8F4)),
+            ),
+          ),
+        );
+      },
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Add Schedule'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          DropdownButton<String>(
-            value: _category,
-            onChanged: (String? newValue) {
-              setState(() {
-                _category = newValue!;
-              });
-            },
-            items: <String>['Me Time', 'Work', 'Study']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: const Text("Schedule"),
+      ),
+      drawer: const DrawerScreen(),
+      body: Column(
+        children: [
+          CalendarSlider(
+            initialDate: DateTime.now(),
+            firstDate: DateTime.now().subtract(const Duration(days: 100)),
+            lastDate: DateTime.now().add(const Duration(days: 100)),
+            onDateSelected: _changeSelectedDate,
+            controller: _firstController,
+            backgroundColor: Color.fromARGB(255, 33, 150, 243),
+            monthYearButtonBackgroundColor: Colors.white,
+            monthYearTextColor: Colors.black,
           ),
-          TextField(
-            decoration: InputDecoration(hintText: 'Catatan'),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => _selectDate(context),
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'Date',
-                    ),
-                    child: Text(
-                      '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: InkWell(
-                  onTap: () => _selectTime(context),
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'Time',
-                    ),
-                    child: Text(
-                      '${_selectedTime.hour}:${_selectedTime.minute}',
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10),
-          Row(
-            children: [
-              Switch(
-                value: isExpense,
-                onChanged: (bool value) {
-                  setState(() {
-                    isExpense = value;
-                  });
-                },
-              ),
-              Text(
-                isExpense ? 'REMINDER' : '',
-                style: TextStyle(fontSize: 14),
-              ),
-              SizedBox(width: 10),
-            ],
-          ),
-          Row(
-            children: [
-              if (isExpense) 
-                DropdownButton<String>(
-                  value: _time,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _time = newValue!;
-                    });
-                  },
-                  items: <String>['5 MENIT', '10 MENIT', '15 MENIT', '30 MENIT']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  disabledHint: Text('Select reminder to enable'),
-                ),
-            ],
-          ),
+          const SizedBox(height: 10.0),
+          _buildCategoryButtons(),
+          Obx(() {
+            return _buildScheduleList();
+          }),
         ],
       ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Cancel'),
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        child: FloatingActionButton(
+          onPressed: () => _showAddScheduleDialog(context),
+          child: const Icon(Icons.add),
         ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Add'),
-        ),
-      ],
+      ),
+      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
     );
   }
 }

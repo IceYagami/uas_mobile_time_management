@@ -37,6 +37,17 @@ dependencies:
   google_fonts: ^3.0.1
   # calendar_appbar: ^0.0.6
   calendar_slider: ^0.0.4
+  firebase_core: ^3.1.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.0.1
+  get: ^4.6.6
+  intl: ^0.19.0
+  date_picker_timeline: ^1.2.6
+  get_storage: ^2.1.1
+  # alarm: ^3.1.4
+  awesome_notifications: ^0.9.3+1
+  timezone: ^0.9.4
+  flutter_native_timezone_updated_gradle: ^2.0.3
 
 dev_dependencies:
   flutter_test:
